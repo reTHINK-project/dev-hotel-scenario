@@ -6,6 +6,23 @@ This repository contains the code developed for the Hotel Guest Scenario in WP5.
 
 Please check the [WP5 Developer Welcome Page](https://github.com/reTHINK-project/scenario-service-implementation/blob/master/README.md) for general information on developments of service scenarios.
 
+
+## Branches Used
+
+Please work on the *development* branch, which is also set as the *default branch*.
+
+The *master branch* is a *protected branch*.  You have to create a *pull request* if you want to merge your code from develop into master.  The following users have currently the rights to push into the master branch / accept merge requests:
+  * @trikolon
+  * @endbert
+  * @emmelmann-fokus
+
+## Using Tags / Branches
+
+Please use [semantic versioning](http://semver.org) for your tags.  You may use lightweight or annotated tags to mark any point in time.  Please use annotated tags with a description / annotation for significant release points.
+
+
+
+  
 ## License
 
 All copyright is with (c) 2015, 2016, 2017 [Fraunhofer FOKUS](http://www.fokus.fraunhofer.de).
@@ -24,14 +41,3 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-
-## Branches Used
-
-Please work on the *development* branch, which is also set as the *default branch*.
-
-The *master branch* is a *protected branch*.  You have to create a *pull request* if you want to merge your code from develop into master.  The following users have currently the rights to push into the master branch / accept merge requests:
-  * @trikolon
-  * @endbert
-  * @emmelmann-fokus
-  
-  
