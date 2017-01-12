@@ -10,4 +10,4 @@ Please check the [WP5 Developer Welcome Page](https://github.com/reTHINK-project
 
 The code contained in this directory is made available under the **XXX** license.
 
-All copyright is with [Fraunhofer FOKUS]()
+All copyright is with (c) 2015, 2016, 2017 [Fraunhofer FOKUS](http://www.fokus.fraunhofer.de).
