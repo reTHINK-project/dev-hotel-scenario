@@ -8,22 +8,48 @@ services:
   mongodb:
     image: "mongo"
   catalogue:
-    image: "rethink/catalogue-broker"
+    image: "local-catalogue-broker"
+    environment:
+        - VIRTUAL_HOST=catalogue.fokus.fraunhofer.de
+        - CERT_NAME=shared
+    command: -host "0.0.0.0" -sourcepackageurlhost "catalogue.fokus.fraunhofer.de" -cp 6683 -v -default "runtime/Runtime" -default "protocolstub/VertxProtoStub"
   catalogue-database:
     image: "rethink/catalogue-database-rethinkdefault"
-  msg-node:
+    command: -o custom_objects -p 6683 -h catalogue
+  msg-node: # FIXME
     image: "rethink/msg-node-vertx"
+    environment:
+        - VIRTUAL_HOST=msg-node.fokus.fraunhofer.de
+#        - VIRTUAL_PORT=9090
+        - CERT_NAME=shared
   dom-registry:
-    image: "rethink/domain-registry"
- # nginx-proxy: # proxies other components without exposed ports
- #   build: ./nginx-proxy/
- #   # expose 443, 80
- # hotelgui-web:
- #   image: nginx
-     # no expose
- #   (...)
- # runtime-web:
- #   image: nginx
-     # no expose
- #   (...)
+    image: "rethink/registry-domain-server"
+    environment:
+        - STORAGE_TYPE=RAM
+        - EXPIRES=3600
+        - VIRTUAL_HOST=registry.fokus.fraunhofer.de
+        - CERT_NAME=shared
+  nginx-proxy:
+      image: jwilder/nginx-proxy
+      container_name: nginx-proxy
+      ports:
+        - "80:80"
+        - "443:443"
+      volumes:
+        - ./certs:/etc/nginx/certs
+        - /var/run/docker.sock:/tmp/docker.sock:ro
+        - ./config/proxy.conf:/etc/nginx/proxy.conf
+  hotelgui-web:
+      image: nginx
+      volumes:
+        - ./hotelGUI:/usr/share/nginx/html
+      environment:
+        - VIRTUAL_HOST=hotel-guest-rethink.fokus.fraunhofer.de
+        - CERT_NAME=shared
+  browser-runtime:
+    build: ./browser-runtime/
+    environment:
+        - VIRTUAL_HOST=runtime.fokus.fraunhofer.de
+        - CERT_NAME=shared
+
 
