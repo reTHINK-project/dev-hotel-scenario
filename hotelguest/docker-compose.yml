@@ -22,6 +22,11 @@ services:
         - VIRTUAL_HOST=msg-node.fokus.fraunhofer.de
 #        - VIRTUAL_PORT=9090
         - CERT_NAME=shared
+        - MSG_NODE_CONFIG=env
+        - NODE_DOMAIN=fokus.fraunhofer.de
+        - NODE_PORT=9090
+        - NODE_REGISTRY_URL=https://dom-registry:4567
+        - NODE_GLOBAL_REGISTRY_URL=http://130.149.22.133:5002
   dom-registry:
     image: "rethink/registry-domain-server"
     environment:
