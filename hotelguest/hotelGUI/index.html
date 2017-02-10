@@ -22,6 +22,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Room Control</title>
 
+    <script src="js/lhcb.js"></script>
+
     <!-- Material Design fonts -->
     <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Roboto:300,400,500,700">
     <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/icon?family=Material+Icons">
@@ -49,7 +51,6 @@
     <script src="https://runtime.fokus.fraunhofer.de/.well-known/runtime/rethink.js"></script>
     <script src="js/colorConversion.js"></script>
     <script src="js/hotelguest.js"></script>
-
 </head>
 <body>
 <div id="roomControl" ng-app="hotelGuestGUI" ng-controller="hotelGuestController">
@@ -165,6 +166,10 @@
                                             </label>
                                         </form>
                                     </div>
+                                    <button ng-show="lhcbClient.isReady()"
+                                            ng-click="lhcbClient.execute('changeIface', [room.wifi.ssid, room.wifi.user])">
+                                        Connect
+                                    </button>
                                 </div>
                                 <div id="device" ng-repeat="device in room.devices" class="fullwidth">
                                     <div ng-if="device.lastValues.temperature.length > 0"

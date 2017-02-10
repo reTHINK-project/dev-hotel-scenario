@@ -21,7 +21,9 @@ var debugMode = false;
 var app = angular.module('hotelGuestGUI', []);
 app.controller('hotelGuestController', ($scope) => {
     $scope.cc = window.colorConversion;
-
+    $scope.lhcb = window.LHCB;
+    $scope.lhcbClient = window.LHCB.getLocalClient();
+    
     var thumbnailUrl;
     if (debugMode) {
         thumbnailUrl = "img/hotel-thumbnail.jpg";
