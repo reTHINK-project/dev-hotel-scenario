@@ -44,7 +44,7 @@ class Database {
     }
 
     connect() {
-        var that = this;
+        const that = this;
         return new Promise((resolve, reject) => {
             if (that.connected()) {
                 reject(new Error("Already connected or connection pending!"));
@@ -56,10 +56,10 @@ class Database {
     }
 
     _init() {
-        var that = this;
+        const that = this;
         return new Promise((resolve) => {
             that._connection = mongoose.createConnection(that.config.db.host, that.config.db.database);
-            that.connection.on('error', function mongodbErrorHandler(error) {
+            that.connection.on('error', (error) => {
                 logger.fatal('Could not establish connection to mongodb!', error);
                 throw new Error(error);
             });
@@ -73,7 +73,7 @@ class Database {
     }
 
     disconnect() {
-        var that = this;
+        const that = this;
         return new Promise((resolve, reject) => {
             if (that.connected()) {
                 that.connection.close(() => {
@@ -90,13 +90,13 @@ class Database {
         if (typeof this.connection !== 'undefined') {
             return this.connection.readyState === 1 || this.connection.readyState === 2;
         }
-        else {
+        
             return false;
-        }
+        
     }
 
     isInitialised() {
-        var that = this;
+        const that = this;
         return new Promise((resolve, reject) => {
             if (!that.connected()) {
                 reject(new Error("Not connected to db!"));
@@ -117,25 +117,20 @@ class Database {
 
 
     createHotel() {
-        var that = this;
+        const that = this;
         return new Promise((resolve, reject) => {
             if (typeof that.config === 'undefined') {
                 reject(new Error("Missing config!"));
             }
-            else {
-                if (!that.connected()) {
+            else if (!that.connected()) {
                     reject(new Error("Can't save data to db! Not connected!"));
                 }
                 else {
-                    var errors = [];
+                    const errors = [];
 
                     that._parseRooms(errors)
-                        .then((errors) => {
-                            return that._parseDevices(errors);
-                        })
-                        .then((errors) => {
-                            return that._setReferences(errors);
-                        })
+                        .then((errors) => that._parseDevices(errors))
+                        .then((errors) => that._setReferences(errors))
                         .then((errors) => {
                             if (errors.length === 0) {
                                 errors = null;
@@ -143,12 +138,11 @@ class Database {
                             resolve(errors);
                         });
                 }
-            }
         });
     }
 
     _parseRooms(errors) {
-        var that = this;
+        const that = this;
         return new Promise((resolve) => {
             if (!that.config.hotel.hasOwnProperty('rooms')) {
                 resolve(errors);
@@ -157,7 +151,7 @@ class Database {
                 logger.debug("Room-cfg existing, adding to db.");
 
                 async.each(that.config.hotel.rooms, (cfg_room, callback2) => {
-                        var room = Room.model();
+                        const room = Room.model();
                         room.name = cfg_room.name;
                         room.isBooked = cfg_room.isBooked;
                         room.wifi = cfg_room.wifi;
@@ -180,7 +174,7 @@ class Database {
     }
 
     _parseDevices(errors) {
-        var that = this;
+        const that = this;
         return new Promise((resolve) => {
             if (!that.config.hotel.hasOwnProperty('devices')) {
                 resolve(errors);
@@ -189,7 +183,7 @@ class Database {
                 logger.debug("Device-cfg existing, adding to db.");
 
                 async.each(that.config.hotel.devices, (cfg_device, callback2) => {
-                    var device = Device.model();
+                    const device = Device.model();
                     device.name = cfg_device.name;
                     device.save((error) => {
                         if (error) {
@@ -207,7 +201,7 @@ class Database {
     }
 
     _setReferences(errors) {
-        var that = this;
+        const that = this;
         return new Promise((resolve) => {
             logger.debug("Establishing db-references");
             async.each(that.config.hotel.devices, (cfg_device, callback) => {
@@ -220,12 +214,12 @@ class Database {
                         errors.push(new Error("Error while querying db", error));
                         return callback();
                     }
-                    else {
+                    
                         if (!room) {
                             errors.push(new Error("Invalid reference '" + cfg_device.name + "." + cfg_device.room + "'! Room '" + cfg_device.room + "' not found."));
                             return callback();
                         }
-                    }
+                    
                     Device.model.findOne({name: cfg_device.name}, (error, device) => {
                         if (error) {
                             errors.push(new Error("Error while querying db", error));
@@ -307,12 +301,12 @@ class Database {
 
     //Wait for other queries to finish
     storeValue(deviceName, objectType, objectId, resourceId, value) {
-        var that = this;
+        const that = this;
         if (that._lastStoreValue === null) {
             that._lastStoreValue = that._storeValueSynced(deviceName, objectType, objectId, resourceId, value);
             return that._lastStoreValue;
         }
-        else {
+        
             that._lastStoreValue = new Promise((resolve, reject) => {
                 that._lastStoreValue
                     .catch(reject)
@@ -325,7 +319,7 @@ class Database {
                     });
             });
             return that._lastStoreValue;
-        }
+        
     }
 
     _storeValueSynced(deviceName, objectType, objectId, resourceId, value) {
@@ -334,15 +328,14 @@ class Database {
                 if (error) {
                     reject(error);
                 }
-                else {
-                    if (!device) {
+                else if (!device) {
                         reject(new Error("Can't store value in db for device '" + deviceName + "'! Device not found!"));
                     }
                     else {
-                        var category;
-                        var location;
+                        let category;
+                        let location;
 
-                        var attr = mapping.getAttrName(objectType, resourceId);
+                        const attr = mapping.getAttrName(objectType, resourceId);
                         if (attr === null) {
                             category = "misc";
                             location = "value";
@@ -371,7 +364,7 @@ class Database {
                         }
 
 
-                        var found = false;
+                        let found = false;
                         device.lastValues[category].forEach((entry) => {
                             if (entry.id === parseInt(objectId)) {
                                 util.setNestedValue(entry, location, value);
@@ -384,7 +377,7 @@ class Database {
                         });
 
                         if (!found) {
-                            var obj = {};
+                            const obj = {};
                             util.setNestedValue(obj, location, value);
                             if (location === "misc") {
                                 obj.uri = '/' + objectType + '/' + objectId + '/' + resourceId;
@@ -403,7 +396,6 @@ class Database {
                             }
                         })
                     }
-                }
             });
         });
     }
@@ -414,7 +406,7 @@ class Database {
                 reject(new Error("Database.getObject(): Invalid parameters!"));
             }
             else {
-                var model = {};
+                let model = {};
                 switch (type) {
                     case "device":
                         model = Device.model;
@@ -426,7 +418,7 @@ class Database {
                         reject(new Error("Invalid type"));
                         break;
                 }
-                var query;
+                let query;
                 if (typeof objName === "undefined" || objName === null) {
                     query = model.find();
                 }

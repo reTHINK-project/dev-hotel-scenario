@@ -17,9 +17,9 @@
  */
 'use strict';
 
-var mapping = {};
+const mapping = {};
 
-let map = [
+const map = [
     {
         "objectTypeId": 3303,
         "objectType": "temperature",
@@ -114,22 +114,22 @@ let map = [
  * If no resourceTypeId is provided, only objectType is returned
  */
 mapping.getAttrName = (objectTypeId, resourceTypeId) => {
-    var objectType, resourceType;
-    for (var i = 0; i < map.length; i++) {
-        if (map[i].objectTypeId == objectTypeId) {
+    let objectType, resourceType;
+    for (let i = 0; i < map.length; i++) {
+        if (map[i].objectTypeId === objectTypeId) {
             objectType = map[i].objectType;
             //If only objectType is set
             if (resourceTypeId === null || typeof resourceTypeId === "undefined") {
                 return {
-                    "objectType": objectType
+                    objectType
                 }
             }
-            for (var j = 0; j < map[i].resources.length; j++) {
-                if (map[i].resources[j].resourceTypeId == resourceTypeId) {
+            for (let j = 0; j < map[i].resources.length; j++) {
+                if (map[i].resources[j].resourceTypeId === resourceTypeId) {
                     resourceType = map[i].resources[j].resourceType;
                     return {
-                        "resourceType": resourceType,
-                        "objectType": objectType,
+                        resourceType,
+                        objectType,
                         "readOnly": map[i].resources[j].readOnly
                     }
                 }
@@ -145,23 +145,23 @@ mapping.getAttrName = (objectTypeId, resourceTypeId) => {
  * If no resourceType is provided, only objectTypeId is returned
  */
 mapping.getAttrId = (objectType, resourceType) => {
-    var objectTypeId, resourceTypeId;
+    let objectTypeId, resourceTypeId;
 
-    for (var i = 0; i < map.length; i++) {
-        if (map[i].objectType == objectType) {
+    for (let i = 0; i < map.length; i++) {
+        if (map[i].objectType === objectType) {
             objectTypeId = map[i].objectTypeId;
             //If only objectType is set
             if (resourceType === null || typeof resourceType === "undefined") {
                 return {
-                    "objectTypeId": objectTypeId
+                    objectTypeId
                 }
             }
-            for (var j = 0; j < map[i].resources.length; j++) {
-                if (map[i].resources[j].resourceType == resourceType) {
+            for (let j = 0; j < map[i].resources.length; j++) {
+                if (map[i].resources[j].resourceType === resourceType) {
                     resourceTypeId = map[i].resources[j].resourceTypeId;
                     return {
-                        "resourceTypeId": resourceTypeId,
-                        "objectTypeId": objectTypeId,
+                        resourceTypeId,
+                        objectTypeId,
                         "readOnly": map[i].resources[j].readOnly
                     }
                 }

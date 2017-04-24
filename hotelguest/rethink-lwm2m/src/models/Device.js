@@ -18,8 +18,8 @@
 'use strict';
 import mongoose from "mongoose";
 
-var Schema = mongoose.Schema;
-var device = {};
+const Schema = mongoose.Schema;
+const device = {};
 
 device.schema = new Schema({
     name: {type: String, unique: true},

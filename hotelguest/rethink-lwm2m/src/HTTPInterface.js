@@ -21,7 +21,7 @@ import logger from "logops";
 import util from "./Util";
 import mapping from "./lwm2m-mapping";
 
-let interfaceError = Object.freeze({
+const interfaceError = Object.freeze({
     invalidJSON: "Invalid JSON-String",
     invalidHTTPMethod: "HTTP-Method not supported",
     writeFail: "LWM2M-write failed",
@@ -32,7 +32,7 @@ let interfaceError = Object.freeze({
 
 
 //HTTP-to-CoAP Mapping (https://tools.ietf.org/html/draft-ietf-core-http-mapping-10#section-7)
-let coapToHTTP = Object.freeze({
+const coapToHTTP = Object.freeze({
     "2.01": 201, "2.02": 200, "2.03": 200, "2.04": 200, "2.05": 200, "4.00": 400, "4.01": 403, "4.02": 500, "4.03": 403,
     "4.04": 404, "4.05": 400, "4.06": 406, "4.12": 412, "4.13": 413, "4.15": 415, "5.00": 500, "5.01": 501, "5.02": 502,
     "5.03": 503, "5.04": 504, "5.05": 502
@@ -56,7 +56,7 @@ class HTTPInterface {
                 reject(new Error("Invalid path to cert-files!"));
             }
             else {
-                var options = {};
+                const options = {};
                 util.readFile(keyFile)
                     .catch(reject)
                     .then((key) => {
@@ -73,10 +73,10 @@ class HTTPInterface {
     }
 
     static _getErrorReply(errorType, msg) {
-        var json = {};
+        const json = {};
 
         //1st param (error type from enum interfaceError)
-        for (var key in interfaceError) {
+        for (const key in interfaceError) {
             if (interfaceError.hasOwnProperty(key) && errorType === interfaceError[key]) {
                 json.error = interfaceError[key];
             }
@@ -101,13 +101,13 @@ class HTTPInterface {
     }
 
     _processRequest(params) {
-        var that = this;
+        const that = this;
         return new Promise((resolve) => {
-            var reply = {};
+            const reply = {};
             reply.data = null;
             reply.error = null;
-            var objectType = null;
-            var objectName = null;
+            let objectType = null;
+            let objectName = null;
 
             if (params.hasOwnProperty("mode") && (params.mode === "read" || params.mode === "write")) {
                 if (params.mode === "read") {
@@ -116,12 +116,10 @@ class HTTPInterface {
                         objectType = "room";
                         objectName = params.room;
                     }
-                    else {
-                        if (params.hasOwnProperty("device")) {
+                    else if (params.hasOwnProperty("device")) {
                             objectType = "device";
                             objectName = params.device;
                         }
-                    }
 
                     if (objectType === null) {
                         reply.error = HTTPInterface._getErrorReply(interfaceError.unsupportedParam, "Please specify which data to read");
@@ -150,7 +148,7 @@ class HTTPInterface {
                         if (typeof params.value !== "string") {
                             params.value = JSON.stringify(params.value);
                         }
-                        var httpCode;
+                        let httpCode;
                         that._write(params.deviceName, params.objectType, params.objectId, params.resourceType, params.value)
                             .catch((error) => {
                                 if (typeof error.code !== "undefined" && error.code !== null) { //if present, translate coap error-code to http
@@ -178,14 +176,13 @@ class HTTPInterface {
     }
 
     _write(deviceName, objectType, objectId, resourceType, value) {
-        var that = this;
+        const that = this;
         return new Promise((resolve, reject) => {
-            var ids = mapping.getAttrId(objectType, resourceType);
+            const ids = mapping.getAttrId(objectType, resourceType);
             if (ids === null) {
                 reject(new Error("Invalid objectType or resourceType"));
             }
-            else {
-                if (ids.readOnly === true) {
+            else if (ids.readOnly === true) {
                     reject(new Error("Resource '" + resourceType + "' of objectType '" + objectType + "' is read-only"));
                 }
                 else {
@@ -195,34 +192,34 @@ class HTTPInterface {
                         })
                         .then(resolve);
                 }
-            }
         });
     }
 
     _listen(options) {
-        var that = this;
+        const that = this;
         return new Promise((resolve) => {
             that._server = https.createServer(options, (req, res) => {
-                let head = {
+                const head = {
                     'Content-Type': 'application/json',
                     'Access-Control-Allow-Origin': '*'
                 };
-                if (req.method != "POST") {
+                if (req.method !== "POST") {
                     logger.debug("HTTPInterface: Invalid method from [" + req.headers.host + "]: " + req.method);
                     res.writeHead(405, head);
                     res.end(JSON.stringify(HTTPInterface._getErrorReply(interfaceError.invalidHTTPMethod, "Use POST")));
                 }
                 else {
-                    var body = "";
-                    var bodyValid;
+                    let body = "";
+                    let bodyValid;
                     req.on("data", (data) => {
                         body += data;
                     });
                     req.on("end", () => {
                         bodyValid = true;
                         logger.debug("HTTPInterface: Received data from [" + req.connection.remoteAddress + "]", body);
+                        let params;
                         try {
-                            var params = JSON.parse(body);
+                            params = JSON.parse(body);
                         }
                         catch (e) {
                             res.writeHead(415, head);
@@ -232,7 +229,7 @@ class HTTPInterface {
                         if (bodyValid) {
                             that._processRequest(params) //Process request and ...
                                 .then((result) => {
-                                    var reply, errorCode;
+                                    let reply, errorCode;
                                     if (result instanceof Array) {
                                         reply = result[0];
                                         errorCode = result[1];
@@ -243,14 +240,12 @@ class HTTPInterface {
                                     if (typeof reply.error === "undefined" || reply.error === null) {
                                         res.writeHead(200, head); //all OK
                                     }
-                                    else {
-                                        if (typeof errorCode !== "undefined" && errorCode !== null) {
+                                    else if (typeof errorCode !== "undefined" && errorCode !== null) {
                                             res.writeHead(errorCode, head); //Error from coap
                                         }
                                         else {
                                             res.writeHead(500, head); //Unknown error
                                         }
-                                    }
                                     reply = JSON.stringify(reply);
                                     logger.debug("HTTPInterface: Sending data to [" + req.connection.remoteAddress + "]", reply);
                                     res.end(reply); //... reply to client
@@ -268,20 +263,18 @@ class HTTPInterface {
     }
 
     open() {
-        var that = this;
+        const that = this;
         this._opened = new Promise((resolve, reject) => {
             that._getCertFiles(that._keyFile, that._certFile)
                 .catch(reject)
-                .then((options) => {
-                    return that._listen(options)
-                })
+                .then((options) => that._listen(options))
                 .then(resolve);
         });
         return this._opened;
     }
 
     close() {
-        var that = this;
+        const that = this;
         return new Promise((resolve, reject) => {
             Promise.all([that._opened]) //Wait for start before stop
                 .then(() => {

@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /*
  * Copyright [2015-2017] Fraunhofer Gesellschaft e.V., Institute for
  * Open Communication Systems (FOKUS)
@@ -88,7 +89,7 @@ function exit() {
     process.exit(0);
 }
 
-var commands = {
+const commands = {
     'start': {
         parameters: [],
         description: '\tStart reTHINK-lwm2m',

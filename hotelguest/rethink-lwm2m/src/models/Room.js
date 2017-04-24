@@ -18,8 +18,8 @@
 'use strict';
 import mongoose from "mongoose";
 
-var Schema = mongoose.Schema;
-var room = {};
+const Schema = mongoose.Schema;
+const room = {};
 
 room.schema = new Schema({
     name: String,

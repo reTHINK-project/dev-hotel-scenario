@@ -15,14 +15,14 @@
  * limitations under the License.
  *
  */
-'use strict';
+'use strict'
 import logger from "logops";
 import lwm2mlib from "lwm2m-node-lib";
 import Database from "./Database";
 import HTTPInterface from "./HTTPInterface";
 import mapping from "./lwm2m-mapping";
 
-let lwm2m = {};
+const lwm2m = {};
 lwm2m.server = lwm2mlib.server; //Enables use of all native lwm2m-lib methods
 lwm2m.serverInfo = {};
 let config = {};
@@ -39,30 +39,21 @@ lwm2m.setConfig = (c) => {
     }
 };
 
-lwm2m.getConfig = () => {
-    return config;
-};
+lwm2m.getConfig = () => config;
 
-lwm2m.start = () => {
-    return new Promise((resolve, reject) => {
+lwm2m.start = () => new Promise((resolve, reject) => {
         if (typeof config === 'undefined') {
             logger.error("Missing configuration!");
             reject();
         }
         initdb()
             .catch(reject)
-            .then(() => {
-                return startm2m();
-            })
+            .then(() => startm2m())
             .catch(reject)
-            .then(() => {
-                return initHTTP();
-            })
+            .then(() => initHTTP())
             .catch(reject)
             .then(resolve);
     });
-
-};
 
 function initdb() {
     return new Promise((resolve, reject) => {
@@ -72,9 +63,7 @@ function initdb() {
                 logger.error(error);
                 reject(error);
             })
-            .then(() => {
-                return database.isInitialised()
-            })
+            .then(() => database.isInitialised())
             .catch((error) => {
                 logger.error(error);
                 reject(error);
@@ -120,10 +109,10 @@ function startm2m() {
 }
 
 
-lwm2m.stop = () => {
-    return new Promise((resolve, reject) => {
+lwm2m.stop = () => new Promise((resolve, reject) => {
         if (!lwm2m.serverInfo) { //If server not running, abort.
-            reject(error);
+            logger.error("Can't stop lwm2m server, not running");
+            reject();
         }
         httpInterface.close()
             .catch((error) => {
@@ -149,7 +138,6 @@ lwm2m.stop = () => {
             }
         });
     });
-};
 
 function registrationHandler(endpoint, lifetime, version, binding, payload, callback) {
     logger.info('\nDevice registration:\n----------------------------\n');
@@ -163,7 +151,7 @@ function registrationHandler(endpoint, lifetime, version, binding, payload, call
             //TODO: Make list of objects/resources to observe configurable
 
             //TEMPERATURE
-            let tempObj = mapping.getAttrId("temperature").objectTypeId;
+            const tempObj = mapping.getAttrId("temperature").objectTypeId;
             logger.debug("Got object for observe job:", tempObj);
             observeDeviceData(endpoint, tempObj, 0, mapping.getAttrId("temperature", "value").resourceTypeId);
             observeDeviceData(endpoint, tempObj, 0, mapping.getAttrId("temperature", "unit").resourceTypeId);
@@ -173,7 +161,7 @@ function registrationHandler(endpoint, lifetime, version, binding, payload, call
             //observeDeviceData(endpoint, 3303, 0, 5701); //Unit
 
             //HUMIDITY
-            let humObj = mapping.getAttrId("humidity").objectTypeId;
+            const humObj = mapping.getAttrId("humidity").objectTypeId;
             logger.debug("Got object for observe job:", humObj);
             observeDeviceData(endpoint, humObj, 0, mapping.getAttrId("humidity", "value").resourceTypeId);
             observeDeviceData(endpoint, humObj, 0, mapping.getAttrId("humidity", "unit").resourceTypeId);
@@ -184,17 +172,17 @@ function registrationHandler(endpoint, lifetime, version, binding, payload, call
 
             //LIGHT
             //Get list of light-ids
-            var lightIdsMatch = new RegExp("<\/3311[\/]([0-9]+)>", "g");
-            var lightIds = [];
-            var result = null;
+            const lightIdsMatch = new RegExp("<\/3311[\/]([0-9]+)>", "g");
+            const lightIds = [];
+            let result = null;
             do {
                 result = lightIdsMatch.exec(payload);
-                if (result != null) {
+                if (result !== null) {
                     lightIds.push(result[1]);
                 }
             }
-            while (result != null);
-            let lightObj = mapping.getAttrId("light").objectTypeId;
+            while (result !== null);
+            const lightObj = mapping.getAttrId("light").objectTypeId;
             logger.debug("Got object for observe job:", lightObj);
             lightIds.forEach((id) => {
                 observeDeviceData(endpoint, lightObj, id, mapping.getAttrId("light", "name").resourceTypeId);
@@ -211,7 +199,7 @@ function registrationHandler(endpoint, lifetime, version, binding, payload, call
             });
 
             //LOCK or misc actuators
-            let actObj = mapping.getAttrId("actuator").objectTypeId;
+            const actObj = mapping.getAttrId("actuator").objectTypeId;
             observeDeviceData(endpoint, actObj, 0, mapping.getAttrId("actuator", "isOn").resourceTypeId);
             observeDeviceData(endpoint, actObj, 0, mapping.getAttrId("actuator", "name").resourceTypeId);
             observeDeviceData(endpoint, actObj, 0, mapping.getAttrId("actuator", "applicationType").resourceTypeId);

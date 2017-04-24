@@ -18,7 +18,7 @@
 'use strict';
 import fs from "fs";
 
-var util = {};
+const util = {};
 
 util.readFile = function (file) {
     return new Promise((resolve, reject) => {
@@ -34,9 +34,9 @@ util.readFile = function (file) {
 };
 
 util.setNestedValue = function (obj, keystr, value) {
-    var dest = obj;
-    var arr = keystr.split(".");
-    var i = 0;
+    let dest = obj;
+    const arr = keystr.split(".");
+    let i = 0;
     for (; i < arr.length - 1; i++) {
         if (typeof dest[arr[i]] === "undefined") {
             dest[arr[i]] = {};

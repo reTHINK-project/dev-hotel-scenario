@@ -1,4 +1,4 @@
-var config = {};
+const config = {};
 
 //Configuration of HTTP-interface
 //--------------------------------------------------
@@ -95,4 +95,4 @@ config.server = {
     writeFormat: 'application-vnd-oma-lwm2m/text'
 };
 
-module.exports = config;
+export default config;
