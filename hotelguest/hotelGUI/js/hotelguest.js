@@ -96,7 +96,7 @@ app.controller('hotelGuestController', ($scope) => {
     };
 
     $scope.getDoorLock = (room) => {
-        console.debug("getDoorLock(" + room + ")");
+        console.debug("getDoorLock:", room);
         for (var device in room.devices) {
 
             var actuators = room.devices[device].lastValues.actuator;
@@ -178,7 +178,12 @@ app.controller('hotelGuestController', ($scope) => {
     };
 
     this.roomHandlerNew = (room) => {
+       // if (room instanceof Proxy)
+        room = JSON.parse(JSON.stringify(room)) // FIXME dirty hacks ftw
+        room.devices = [room.values[0].value];  // FIXME part 2
+        //room.values = undefined;
         console.debug("Room received", room);
+        window.newRoom = room;
         hotel.rooms.push(room);
         hotel.rooms.forEach((r) => {
             this.roomInit(r);
@@ -187,6 +192,10 @@ app.controller('hotelGuestController', ($scope) => {
     };
 
     this.roomHandlerChanged = (room) => {
+      //  if (room instanceof Proxy)
+        room = JSON.parse(JSON.stringify(room)) // FIXME dirty hacks ftw
+        room.devices = [room.values[0].value];  // FIXME part 2
+        //room.values = undefined;        
         console.debug("Room updated", room);
         for (var i = 0; i < hotel.rooms.length; i++) {
             if (hotel.rooms[i].name === room.name) {
@@ -313,8 +322,15 @@ app.controller('hotelGuestController', ($scope) => {
         );
     }
     else {
-        window.rethink.default.install({domain: 'fokus.fraunhofer.de', development: false}).then((runtime) => {
-            runtime.requireHyperty("hyperty-catalogue://catalogue.fokus.fraunhofer.de/.well-known/hyperty/RoomClient").then((hyperty) => {
+    	let params = {
+    		runtimeURL: "https://catalogue.fokus.fraunhofer.de/.well-known/runtime/Runtime",
+    		domain: "fokus.fraunhofer.de",
+    		development: false,
+    		indexURL: "https://runtime.fokus.fraunhofer.de/.well-known/runtime/index.html",
+    		sandboxURL: "https://runtime.fokus.fraunhofer.de/.well-known/runtime/sandbox.html"
+    	}
+        window.rethink.default.install(params).then((runtime) => {
+            runtime.requireHyperty("hyperty-catalogue://catalogue.fokus.fraunhofer.de/.well-known/hyperty/RoomClientNode").then((hyperty) => {
                 roomClient = hyperty.instance;
                 window.roomClient = roomClient;
 
