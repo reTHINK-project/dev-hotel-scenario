@@ -21,25 +21,26 @@
  */
 'use strict';
 
+import logger from "logops";
 import lwm2m from "./lwm2m.js";
 import config from "./config.es5.js";
 import cmd from "command-node";
 
 function start() {
     if (lwm2m.server.isRunning()) {
-        console.error("rethink-lwm2m start failed! Already running.");
+        logger.error("rethink-lwm2m start failed! Already running.");
         cmd.prompt();
     }
     else {
-        console.log("Starting rethink-lwm2m...");
+        logger.info("Starting rethink-lwm2m...");
         lwm2m.setConfig(config);
         lwm2m.start()
             .catch((error) => {
-                console.error("rethink-lwm2m start failed!", error);
+                logger.error("rethink-lwm2m start failed!", error);
                 cmd.prompt();
             })
             .then(() => {
-                console.log("rethink-lwm2m started!");
+                logger.info("rethink-lwm2m started!");
                 cmd.prompt();
             })
     }
@@ -47,19 +48,19 @@ function start() {
 
 function stop() {
     if (lwm2m.server.isRunning()) {
-        console.log("Stopping rethink-lwm2m...");
+        logger.info("Stopping rethink-lwm2m...");
         lwm2m.stop()
             .catch((error) => {
-                console.error("rethink-lwm2m stop failed!", error);
+                logger.error("rethink-lwm2m stop failed!", error);
                 cmd.prompt();
             })
             .then(() => {
-                console.log("rethink-lwm2m stopped!");
+                logger.info("rethink-lwm2m stopped!");
                 cmd.prompt();
             });
     }
     else {
-        console.error("Can't stop rethink-lwm2m! Not running.");
+        logger.error("Can't stop rethink-lwm2m! Not running.");
         cmd.prompt();
     }
 }
@@ -73,17 +74,31 @@ function write(params) {
         params[4],
         (error) => {
             if (error) {
-                console.log("Error while writing resource!", error);
+                logger.info("Error while writing resource!", error);
             }
             else {
-                console.log("Written resource successfully!");
+                logger.info("Written resource successfully!");
             }
         })
 }
 
 function showConfig() {
-    console.log(config);
+    logger.info(config);
 }
+
+function loglevel(level) {
+    level = level[0].toUpperCase();
+    const levels = ['DEBUG', 'INFO', 'WARN', 'ERROR', 'FATAL'];
+
+    if (levels.indexOf(level) !== -1) {
+        logger.setLevel(level);
+        logger.fatal("Set log level to", level);
+    }
+    else {
+        logger.fatal("Current level", logger.getLevel());
+    }
+}
+
 
 function exit() {
     process.exit(0);
@@ -109,6 +124,11 @@ const commands = {
         parameters: [],
         description: '\tShow current configuration',
         handler: showConfig
+    },
+    'loglevel': {
+        parameters: ['level'],
+        description: '\tView and change log level',
+        handler: loglevel
     },
     'exit': {
         parameters: [],
