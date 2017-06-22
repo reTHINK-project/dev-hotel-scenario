@@ -4,8 +4,7 @@
   "description": "lwm2m-server for reTHINK, extended to store and manage device-data",
   "main": "index.js",
   "scripts": {
-    "start": "node test-es5/server-cmd.js",
-    "watch": "babel-watch src/index.js",
+    "start": "babel src --out-dir dist/ --source-maps && babel config.js -o dist/config.es5.js && node dist/index.js",
     "test": "mocha --compilers js:babel-register"
   },
   "author": "Paul Zühlcke",
@@ -19,27 +18,18 @@
     "npm": ">=3.8.5"
   },
   "dependencies": {
-    "async": "^2.1.4",
+    "async": "^2.4.1",
     "kerberos": "0.0.23",
-    "logops": "^1.0.7",
+    "logops": "^2.0.0",
     "lwm2m-node-lib": "git://github.com/telefonicaid/lwm2m-node-lib.git#develop",
-    "mongodb": "^2.2.12",
-    "mongoose": "^4.7.1"
+    "mongodb": "^2.2.29",
+    "mongoose": "^4.10.8"
   },
   "devDependencies": {
-    "babel": "~6.23.0",
-    "babel-cli": "^6.18.0",
-    "babel-core": "~6.24.1",
-    "babel-polyfill": "~6.23.0",
-    "babel-preset-es2015": "^6.18.0",
-    "babel-register": "~6.24.1",
-    "babel-runtime": "~6.23.0",
-    "babelify": "~7.3.0",
-    "chai": "^3.5.0",
-    "chai-as-promised": "^6.0.0",
+    "babel-cli": "^6.24.1",
+    "babel-preset-es2015": "^6.24.1",
     "command-node": "^0.1.1",
-    "eslint": "^3.19.0",
-    "eslint-config-recommended": "^1.5.0",
-    "mocha": "^3.2.0"
+    "eslint": "^4.0.0",
+    "eslint-config-recommended": "^1.5.0"
   }
 }
