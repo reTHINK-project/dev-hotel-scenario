@@ -16,6 +16,7 @@
  *
  */
 
+log.setDefaultLevel("DEBUG");
 var debugMode = false;
 
 var app = angular.module('hotelGuestGUI', []);
@@ -59,7 +60,7 @@ app.controller('hotelGuestController', ($scope) => {
                 if (lights[a].color.unit === "CIE_JSON") {
                     lights[a].color.value = rgbToHex_s(cieToRGB_s(lights[a].color.value));
                     lights[a].color.unit = "RGB_HEX";
-                    console.log("converted single color value:", lights[a].color.value);
+                    log.debug("converted single color value:", lights[a].color.value);
                 }
             }
         }
@@ -67,11 +68,11 @@ app.controller('hotelGuestController', ($scope) => {
 
     var satMap = {};
     $scope.sendAction = (deviceName, objectType, objectId, resourceType, value) => {
-        console.debug("sendAction", deviceName, objectType, resourceType, value);
+        log.debug("sendAction", deviceName, objectType, resourceType, value);
         return new Promise((resolve, reject) => {
             if (!roomClient) {
                 var errorMsg = "sendAction(): roomClient hyperty not loaded! Can't perform action."
-                console.error(errorMsg);
+                log.error(errorMsg);
                 $scope.fail.push(errorMsg);
                 reject(errorMsg);
             }
@@ -86,7 +87,7 @@ app.controller('hotelGuestController', ($scope) => {
                 }
                 sat = setTimeout(() => {
                     roomClient.sendAction(deviceName, objectType, objectId, resourceType, value).then((result) => {
-                        console.debug("sendAction(): Action sent", result);
+                        log.debug("sendAction(): Action sent", result);
                         resolve(result);
                     })
                 }, 100);
@@ -96,14 +97,14 @@ app.controller('hotelGuestController', ($scope) => {
     };
 
     $scope.getDoorLock = (room) => {
-        console.debug("getDoorLock(" + room + ")");
+        log.debug("getDoorLock:", room);
         for (var device in room.devices) {
 
             var actuators = room.devices[device].lastValues.actuator;
 
             for (var a in actuators) {
                 if (actuators[a].applicationType === "doorLock" && actuators[a].name === "Door") {
-                    console.debug("getDoorLock(): Found door lock", actuators[a]);
+                    log.debug("getDoorLock(): Found door lock", actuators[a]);
                     return actuators[a];
                 }
             }
@@ -112,7 +113,7 @@ app.controller('hotelGuestController', ($scope) => {
 
 
     $scope.toggleDoorLock = (doorLock, room) => {
-        console.debug("toggleDoorLock:", doorLock, room);
+        log.debug("toggleDoorLock:", doorLock, room);
 
         var rooms = $scope.hotel.rooms;
         if (room)
@@ -127,9 +128,9 @@ app.controller('hotelGuestController', ($scope) => {
 
                 for (var a in actuators) {
                     if (doorLock === undefined || actuators[a] === doorLock) {
-                        console.debug("toggleDoorLock(): Found device", r.devices[device]);
+                        log.debug("toggleDoorLock(): Found device", r.devices[device]);
                         $scope.sendAction(r.devices[device].name, "actuator", doorLock.id, "isOn", doorLock.isOn).then((result) => {
-                            console.debug("sendAction(): Action sent", result);
+                            log.debug("sendAction(): Action sent", result);
                         })
 
                     }
@@ -143,7 +144,7 @@ app.controller('hotelGuestController', ($scope) => {
     $scope.toggleGlobalState = (type, state) => {
 
         if (type !== "doorLock" && type !== "light") {
-            console.error("Invalid type");
+            log.error("Invalid type");
         }
         else {
             var tasks = [];
@@ -165,8 +166,8 @@ app.controller('hotelGuestController', ($scope) => {
             });
             Promise.all(tasks)
                 .then((result) => {
-                    console.debug("Set " + type + " state for all lights to", state);
-                    console.debug("Result:", result);
+                    log.debug("Set " + type + " state for all lights to", state);
+                    log.debug("Result:", result);
                 })
         }
 
@@ -178,7 +179,14 @@ app.controller('hotelGuestController', ($scope) => {
     };
 
     this.roomHandlerNew = (room) => {
-        console.debug("Room received", room);
+        log.debug(room);
+        log.debug(room.name);
+       // if (room instanceof Proxy)
+        //room = JSON.parse(JSON.stringify(room)) // FIXME dirty hacks ftw
+        room.devices = [room.values[0].value];  // FIXME part 2
+        //room.values = undefined;
+        log.debug("Room received", room);
+        window.newRoom = room;
         hotel.rooms.push(room);
         hotel.rooms.forEach((r) => {
             this.roomInit(r);
@@ -187,12 +195,16 @@ app.controller('hotelGuestController', ($scope) => {
     };
 
     this.roomHandlerChanged = (room) => {
-        console.debug("Room updated", room);
+      //  if (room instanceof Proxy)
+        //room = JSON.parse(JSON.stringify(room)) // FIXME dirty hacks ftw
+        room.devices = [room.values[0].value];  // FIXME part 2
+        //room.values = undefined;        
+        log.debug("Room updated", room);
         for (var i = 0; i < hotel.rooms.length; i++) {
             if (hotel.rooms[i].name === room.name) {
                 hotel.rooms[i] = room;
                 this.roomInit(room);
-                console.debug("Converted color values for room", room);
+                log.debug("Converted color values for room", room);
                 break;
             }
         }
@@ -200,7 +212,7 @@ app.controller('hotelGuestController', ($scope) => {
     };
 
     this.errorHandler = (error) => {
-        console.error("Error in roomClient", error);
+        log.error("Error in roomClient", error);
         if (typeof error !== "undefined") {
             $scope.fail.push(error.message);
         }
@@ -209,17 +221,17 @@ app.controller('hotelGuestController', ($scope) => {
 
 
     this.userStateChangeHandler = (isAdmin) => {
-        console.debug("userStateChange", isAdmin);
+        log.debug("userStateChange", isAdmin);
         $scope.adminMode = isAdmin;
         $scope.$applyAsync();
     };
 
 
     var token = getURLParameter("token");
-    console.debug("URL value for 'token':", token);
+    log.debug("URL value for 'token':", token);
     if (token === null) {
         var errorMsg = "Invalid identity token! Must not be empty! [Test tokens: Admin: 'token=admintoken', User: 'token=usertoken']";
-        console.error(errorMsg);
+        log.error(errorMsg);
         $scope.fail.push(errorMsg);
         return;
     }
@@ -313,8 +325,15 @@ app.controller('hotelGuestController', ($scope) => {
         );
     }
     else {
-        window.rethink.default.install({domain: 'fokus.fraunhofer.de', development: false}).then((runtime) => {
-            runtime.requireHyperty("hyperty-catalogue://catalogue.fokus.fraunhofer.de/.well-known/hyperty/RoomClient").then((hyperty) => {
+    	let params = {
+    		runtimeURL: "https://catalogue.fokus.fraunhofer.de/.well-known/runtime/Runtime",
+    		domain: "fokus.fraunhofer.de",
+    		development: false,
+    		indexURL: "https://runtime.fokus.fraunhofer.de/.well-known/runtime/index.html",
+    		sandboxURL: "https://runtime.fokus.fraunhofer.de/.well-known/runtime/sandbox.html"
+    	}
+        window.rethink.default.install(params).then((runtime) => {
+            runtime.requireHyperty("hyperty-catalogue://catalogue.fokus.fraunhofer.de/.well-known/hyperty/RoomClientNode").then((hyperty) => {
                 roomClient = hyperty.instance;
                 window.roomClient = roomClient;
 

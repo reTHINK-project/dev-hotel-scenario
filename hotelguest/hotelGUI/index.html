@@ -22,6 +22,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Room Control</title>
 
+	<!-- Favicon and app settings -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="theme-color" content="#ffffff">
+
     <script src="js/lhcb.js"></script>
 
     <!-- Material Design fonts -->
@@ -48,6 +56,7 @@
     <link rel="stylesheet" href="css/spinner.css">
     <link rel="stylesheet" href="css/slider.css">
 
+	<script src="js/loglevel.min.js"></script>
     <script src="https://runtime.fokus.fraunhofer.de/.well-known/runtime/rethink.js"></script>
     <script src="js/colorConversion.js"></script>
     <script src="js/hotelguest.js"></script>
@@ -145,7 +154,7 @@
                         </div>
                     </div>
                     <div id="{{room.name}}-collapse"
-                         class='{{$index == 0 ? "panel-collapse collapse in" : "panel-collapse collapse"}}'>
+                         class="panel-collapse collapse in"'>
                         <div class="panel-body">
                             <div class="flex-container flex-col">
                                 <div class="box flex-col" ng-if="room.hasOwnProperty('wifi')">
