@@ -15,7 +15,9 @@
  * limitations under the License.
  *
  */
-'use strict'
+'use strict';
+
+
 import logger from "logops";
 import lwm2mlib from "lwm2m-node-lib";
 import Database from "./Database";
@@ -42,18 +44,18 @@ lwm2m.setConfig = (c) => {
 lwm2m.getConfig = () => config;
 
 lwm2m.start = () => new Promise((resolve, reject) => {
-        if (typeof config === 'undefined') {
-            logger.error("Missing configuration!");
-            reject();
-        }
-        initdb()
-            .catch(reject)
-            .then(() => startm2m())
-            .catch(reject)
-            .then(() => initHTTP())
-            .catch(reject)
-            .then(resolve);
-    });
+    if (typeof config === 'undefined') {
+        logger.error("Missing configuration!");
+        reject();
+    }
+    initdb()
+        .catch(reject)
+        .then(() => startm2m())
+        .catch(reject)
+        .then(() => initHTTP())
+        .catch(reject)
+        .then(resolve);
+});
 
 function initdb() {
     return new Promise((resolve, reject) => {
@@ -110,34 +112,34 @@ function startm2m() {
 
 
 lwm2m.stop = () => new Promise((resolve, reject) => {
-        if (!lwm2m.serverInfo) { //If server not running, abort.
-            logger.error("Can't stop lwm2m server, not running");
-            reject();
-        }
-        httpInterface.close()
-            .catch((error) => {
-                logger.error("Error while closing httpInterface!", error);
-            })
-            .then(() => {
-                logger.debug("Closed http-interface");
-            });
-        database.disconnect()
-            .catch((error) => {
-                logger.error("Error while disconnecting from db!", error);
-            })
-            .then(() => {
-                logger.debug("Disconnected from db");
-            });
-        lwm2m.server.stop(lwm2m.serverInfo, (error) => { //TODO: Observes somehow do not stop on lwm2m.server stop
-            if (error) {
-                reject(error);
-            }
-            else {
-                logger.debug("Stopped lwm2m");
-                resolve();
-            }
+    if (!lwm2m.serverInfo) { //If server not running, abort.
+        logger.error("Can't stop lwm2m server, not running");
+        reject();
+    }
+    httpInterface.close()
+        .catch((error) => {
+            logger.error("Error while closing httpInterface!", error);
+        })
+        .then(() => {
+            logger.debug("Closed http-interface");
         });
+    database.disconnect()
+        .catch((error) => {
+            logger.error("Error while disconnecting from db!", error);
+        })
+        .then(() => {
+            logger.debug("Disconnected from db");
+        });
+    lwm2m.server.stop(lwm2m.serverInfo, (error) => { //TODO: Observes somehow do not stop on lwm2m.server stop
+        if (error) {
+            reject(error);
+        }
+        else {
+            logger.debug("Stopped lwm2m");
+            resolve();
+        }
     });
+});
 
 function registrationHandler(endpoint, lifetime, version, binding, payload, callback) {
     logger.info('\nDevice registration:\n----------------------------\n');
@@ -151,24 +153,15 @@ function registrationHandler(endpoint, lifetime, version, binding, payload, call
             //TODO: Make list of objects/resources to observe configurable
 
             //TEMPERATURE
-            const tempObj = mapping.getAttrId("temperature").objectTypeId;
-            logger.debug("Got object for observe job:", tempObj);
-            observeDeviceData(endpoint, tempObj, 0, mapping.getAttrId("temperature", "value").resourceTypeId);
-            observeDeviceData(endpoint, tempObj, 0, mapping.getAttrId("temperature", "unit").resourceTypeId);
-
-            //Old
-            //observeDeviceData(endpoint, 3303, 0, 5700); //Temperature
-            //observeDeviceData(endpoint, 3303, 0, 5701); //Unit
+            const tempObjectTypeId = mapping.getAttrId("temperature").objectTypeId;
+            observeDeviceData(endpoint, tempObjectTypeId, 0, mapping.getAttrId("temperature", "value").resourceTypeId);
+            observeDeviceData(endpoint, tempObjectTypeId, 0, mapping.getAttrId("temperature", "unit").resourceTypeId);
 
             //HUMIDITY
-            const humObj = mapping.getAttrId("humidity").objectTypeId;
-            logger.debug("Got object for observe job:", humObj);
-            observeDeviceData(endpoint, humObj, 0, mapping.getAttrId("humidity", "value").resourceTypeId);
-            observeDeviceData(endpoint, humObj, 0, mapping.getAttrId("humidity", "unit").resourceTypeId);
+            const humObjectTypeId = mapping.getAttrId("humidity").objectTypeId;
+            observeDeviceData(endpoint, humObjectTypeId, 0, mapping.getAttrId("humidity", "value").resourceTypeId);
+            observeDeviceData(endpoint, humObjectTypeId, 0, mapping.getAttrId("humidity", "unit").resourceTypeId);
 
-            //Old
-            //observeDeviceData(endpoint, 3304, 0, 5700); //Humidity
-            //observeDeviceData(endpoint, 3304, 0, 5701); //Unit
 
             //LIGHT
             //Get list of light-ids
@@ -183,19 +176,12 @@ function registrationHandler(endpoint, lifetime, version, binding, payload, call
             }
             while (result !== null);
             const lightObj = mapping.getAttrId("light").objectTypeId;
-            logger.debug("Got object for observe job:", lightObj);
             lightIds.forEach((id) => {
                 observeDeviceData(endpoint, lightObj, id, mapping.getAttrId("light", "name").resourceTypeId);
                 observeDeviceData(endpoint, lightObj, id, mapping.getAttrId("light", "isOn").resourceTypeId);
                 observeDeviceData(endpoint, lightObj, id, mapping.getAttrId("light", "dimmer").resourceTypeId);
                 observeDeviceData(endpoint, lightObj, id, mapping.getAttrId("light", "color.value").resourceTypeId);
                 observeDeviceData(endpoint, lightObj, id, mapping.getAttrId("light", "color.unit").resourceTypeId);
-
-                //observeDeviceData(endpoint, 3311, id, 5801); //Light name
-                //observeDeviceData(endpoint, 3311, id, 5850); //Light on/off state
-                //observeDeviceData(endpoint, 3311, id, 5851); //Light dimmer
-                //observeDeviceData(endpoint, 3311, id, 5706); //Light color
-                //observeDeviceData(endpoint, 3311, id, 5701); //Light color unit
             });
 
             //LOCK or misc actuators
@@ -239,38 +225,35 @@ function observeHandler(value, objectType, objectId, resourceId, deviceId) {
 }
 
 function observeDeviceData(deviceName, objectType, objectId, resourceId) {
-    logger.debug("observeDeviceData(): start")
-    logger.debug("test");
+    logger.debug("Starting new observe with parameters", arguments);
     lwm2m.server.getRegistry().getByName(deviceName, (error, device) => {
         if (error) {
-            logger.error(error);
+            throw new Error(error);
         }
-        else {
-            lwm2m.server.observe(device.id, objectType, objectId, resourceId, observeHandler, (error, value) => {
-                if (error) {
-                    logger.error("Error while starting observe!", error)
-                }
-                else {
-                    logger.debug("Started observe for '%s'. First value: ", deviceName, value);
-                    if (value === '') { //No data => Device does not set data
-                        logger.debug("Device '" + deviceName + "' does not set /" + objectType + "/" + objectId + "/" + resourceId + "! Canceling observe.");
-                        lwm2m.server.cancelObserver(device.id, objectType, objectId, resourceId, () => {
-                            logger.debug("Observe for '%s' canceled!", device.name);
-                        });
-                    }
-                    else {
-                        logger.debug("START: database.storeValue(" + deviceName + ", " + objectType + ", " + objectId + ", " + resourceId + ", " + value + ")");
-                        database.storeValue(deviceName, objectType, objectId, resourceId, value)
-                            .catch((error) => {
-                                logger.error("Error while storing initial read-data!", error);
-                            })
-                            .then(() => {
-                                logger.debug("DONE: database.storeValue(" + deviceName + ", " + objectType + ", " + objectId + ", " + resourceId + ", " + value + ")");
-                            });
-                    }
-                }
-            });
-        }
+        lwm2m.server.observe(device.id, objectType, objectId, resourceId, observeHandler, (error, value) => {
+            if (error) {
+                throw new Error(error);
+            }
+            logger.debug("Started observe for '%s'. First value: ", deviceName, value);
+            if (value === '') { //No data => Device does not set data
+                logger.debug("Device '" + deviceName + "' does not set /" + objectType + "/" + objectId + "/" + resourceId + "! Canceling observe.");
+                lwm2m.server.cancelObserver(device.id, objectType, objectId, resourceId, () => {
+                    logger.debug("Observe for '%s' canceled!", device.name);
+                });
+            }
+            else {
+                logger.debug("START: database.storeValue(" + deviceName + ", " + objectType + ", " + objectId + ", " + resourceId + ", " + value + ")");
+                database.storeValue(deviceName, objectType, objectId, resourceId, value)
+                    .catch((error) => {
+                        logger.error("Error while storing initial read-data!", error);
+                    })
+                    .then(() => {
+                        logger.debug("DONE: database.storeValue(" + deviceName + ", " + objectType + ", " + objectId + ", " + resourceId + ", " + value + ")");
+                    });
+            }
+
+        });
+
     });
 
 }
