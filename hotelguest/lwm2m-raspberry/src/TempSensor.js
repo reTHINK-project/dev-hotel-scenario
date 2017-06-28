@@ -36,7 +36,7 @@ class TempSensor {
     }
 
     start() {
-        var that = this;
+        const that = this;
         return new Promise((resolve, reject) => {
             if (!that._client || typeof that._client === "undefined") {
                 reject(new Error("lwm2m-client object not set"));
@@ -56,18 +56,17 @@ class TempSensor {
                         this._sensors = ids;
 
                         //For each sensor, create client object for lwm2m
-                        var index = 0;
-                        var errors = [];
+                        let index = 0;
+                        const errors = [];
                         async.each(ids, (id, callback) => {
                             util.createClientObject(that._client, "/" + that._objectTypeId + "/" + index)
                                 .catch(reject)
-                                .then(() => {
-                                    return util.setClientResource(
-                                        that._client,
-                                        "/" + that._objectTypeId + "/" + index,
-                                        mapping.getAttrId("temperature", "unit").resourceTypeId,
-                                        "Cel"); //Set temperature object unit
-                                })
+                                .then(() => util.setClientResource(
+                                    that._client,
+                                    "/" + that._objectTypeId + "/" + index,
+                                    mapping.getAttrId("temperature", "unit").resourceTypeId,
+                                    "Cel") //Set temperature object unit
+                                )
                                 .catch((error) => {
                                     if (error) {
                                         errors.push(error);
@@ -105,9 +104,9 @@ class TempSensor {
     }
 
     _setClientTemp(that) {
-        var index = 0;
-        var errors = [];
-        var resourceTypeId = mapping.getAttrId("temperature", "value").resourceTypeId;
+        let index = 0;
+        const errors = [];
+        const resourceTypeId = mapping.getAttrId("temperature", "value").resourceTypeId;
 
         async.each(that._sensors, (id, callback) => {
             ds18b20.temperature(id, (error, value) => {

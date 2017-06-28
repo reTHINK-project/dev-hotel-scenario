@@ -17,7 +17,7 @@
  */
 'use strict';
 
-var util = {};
+const util = {};
 
 //Methods wrapped in promises
 

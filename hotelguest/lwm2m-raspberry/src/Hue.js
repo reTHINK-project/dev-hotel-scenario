@@ -32,9 +32,9 @@ class Hue {
     }
 
     start() { //Get all lights and create lwm2m-objects
-        var that = this;
+        const that = this;
         return new Promise((resolve, reject) => {
-            var lights = null;
+            let lights = null;
 
             this._hue.getLights()
                 .catch(reject)
@@ -50,10 +50,10 @@ class Hue {
     }
 
     _initObjects(lights) {
-        var that = this;
+        const that = this;
         return new Promise((resolve, reject) => {
-            var errors = [];
-            var objectTypeId = mapping.getAttrId("light").objectTypeId;
+            const errors = [];
+            const objectTypeId = mapping.getAttrId("light").objectTypeId;
 
             async.each(Object.keys(lights), (id, callback) => {
 
@@ -65,9 +65,9 @@ class Hue {
                         }
                     })
                     .then(() => {
-                        var obj = "/" + objectTypeId + "/" + id;
-                        var state = lights[id].state;
-                        var setVal = [];
+                        const obj = "/" + objectTypeId + "/" + id;
+                        const state = lights[id].state;
+                        const setVal = [];
                         logger.debug("Hue: Created lwm2m-object for light '" + id + "' '/" + objectTypeId + "/" + id + "'");
 
                         //Get initial light info and set resources
@@ -137,14 +137,14 @@ class Hue {
     }
 
     handleWrite(objectType, objectId, resourceId, value) {
-        var that = this;
+        const that = this;
         return new Promise((resolve, reject) => {
             if (objectType !== "3311") {
                 reject(new Error("Invalid objectType for hue!"));
             }
             else {
-                var attr = mapping.getAttrName(objectType, resourceId);
-                if (attr == null) {
+                const attr = mapping.getAttrName(objectType, resourceId);
+                if (attr === null) {
                     reject(new Error("Unknown operation for resourceId " + resourceId + ", objectType " + objectType));
                 }
                 else {
@@ -161,7 +161,7 @@ class Hue {
                             break;
                         case "dimmer": //range: 1-100
                             if (value >= 1 && value <= 100) {
-                                var briState = {};
+                                const briState = {};
                                 briState.bri = util.convertRangeRound(value, [1, 100], [1, 254]);
                                 that._hue.light(objectId).setState(briState)
                                     .catch(reject)
@@ -175,11 +175,11 @@ class Hue {
                             }
                             break;
                         case "color.value":
-                            var colorCoord = JSON.parse(value);
+                            const colorCoord = JSON.parse(value);
                             if (!(colorCoord.hasOwnProperty("length")) || !(colorCoord.length === 2)) { //Test if array [x,y]
                                 reject(new Error("Invalid coordinate-array! Expected [x,y]"));
                             }
-                            var colorState = {};
+                            const colorState = {};
                             colorState.xy = colorCoord;
 
                             that._hue.light(objectId).setState(colorState)
@@ -204,16 +204,16 @@ class Hue {
     }
 
     _setOnState(id, state) {
-        var that = this;
+        const that = this;
         return new Promise((resolve, reject) => {
-            var done;
+            let done;
             try {
                 state = JSON.parse(state);
             }
             catch (e) {
                 reject(new Error("Hue: _setOnState(): Could not parse on-state"));
             }
-            if (state == true || state == 1) {
+            if (state === true || state === 1) {
                 done = that._hue.light(id).on();
             }
             else {

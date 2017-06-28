@@ -27,9 +27,9 @@ class DoorLock {
     }
 
     start() { //Create lwm2m-object/s //TODO support multiple door locks
-        var that = this;
+        const that = this;
         return new Promise((resolve, reject) => {
-            var obj = "/" + mapping.getAttrId("actuator").objectTypeId + "/" + 0;
+            const obj = "/" + mapping.getAttrId("actuator").objectTypeId + "/" + 0;
 
             util.createClientObject(that._lwm2m, obj)
                 .catch((error) => {
@@ -68,15 +68,14 @@ class DoorLock {
     }
 
     handleWrite(objectType, objectId, resourceId, value) {
-        var that = this;
         return new Promise((resolve, reject) => {
             logger.debug("DoorLock handleWrite:", objectType, objectId, resourceId, value);
-            if (objectType != mapping.getAttrId("actuator").objectTypeId) {
+            if (objectType !== mapping.getAttrId("actuator").objectTypeId) {
                 reject(new Error("Invalid objectType for DoorLock!"));
             }
             else {
-                var attr = mapping.getAttrName(objectType, resourceId);
-                if (attr == null) {
+                const attr = mapping.getAttrName(objectType, resourceId);
+                if (attr === null) {
                     reject(new Error("Unknown operation for resourceId " + resourceId + ", objectType " + objectType));
                 }
                 else {

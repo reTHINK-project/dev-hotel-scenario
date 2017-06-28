@@ -30,36 +30,36 @@ logger.format = logger.formatters.dev;
 logger.setLevel('INFO'); //Initial log-level, overwritten by config later
 
 
-var client = lwm2mlib.client;
-var globalDeviceInfo = null;
-var tempSensor = null;
-var hue = null;
-var doorLock = null;
+const client = lwm2mlib.client;
+let globalDeviceInfo = null;
+let tempSensor = null;
+let hue = null;
+let doorLock = null;
 
 logger.debug("Initialising from config");
 init()
-    .catch(function (error) {
+    .catch((error) => {
         logger.fatal("Error while initialising! Abort.");
         if (error) {
             logger.fatal(error);
         }
         process.exit(1);
     })
-    .then(function () {
-        var timeout_ms = 10000;
-        var timeout = setTimeout(() => {
+    .then(() => {
+        const timeout_ms = 10000;
+        const timeout = setTimeout(() => {
             logger.info("Timeout: Unable to register to server within " + timeout_ms + "ms!");
             cmd_stop();
         }, timeout_ms);
 
         logger.info("Connecting to lwm2m-server [" + config.connection.host + ":" + config.connection.port + "] as '" + config.connection.endpoint + "'");
         register()
-            .catch(function (error) {
+            .catch((error) => {
                 logger.error("Could not connect to server!", error);
                 clearTimeout(timeout);
                 cmd_stop();
             })
-            .then(function () {
+            .then(() => {
                 clearTimeout(timeout);
                 logger.info("Registered at server '" + config.connection.host + ":" + config.connection.port + "' as '"
                     + config.connection.endpoint + "'!");
@@ -67,7 +67,7 @@ init()
     });
 
 function init() {
-    return new Promise(function (resolve, reject) {
+    return new Promise(((resolve, reject) => {
         if (!config || !config.hasOwnProperty("client") || !config.hasOwnProperty("connection")) {
             reject(new Error("Invalid configuration! Can't start."));
         }
@@ -80,7 +80,7 @@ function init() {
 
             logger.info("Starting devices");
             //Init devices attached and enabled
-            var devices = [];
+            const devices = [];
             if (config.sensors.hasOwnProperty("temperature") && config.sensors.temperature.enabled === true) {
                 devices.push(initTempSensor());
             }
@@ -105,7 +105,7 @@ function init() {
                 })
                 .then(resolve);
         }
-    });
+    }));
 }
 
 function initHue() {
@@ -167,7 +167,7 @@ function read(objectType, objectId, resourceId, value, callback) {
 function write(objectType, objectId, resourceId, value, callback) {
     logger.debug("Received 'write'\n" + objectType + "/" + objectId + " " + resourceId + " " + value);
 
-    if (objectType == mapping.getAttrId("light").objectTypeId) {
+    if (objectType === mapping.getAttrId("light").objectTypeId) {
         if (hue) {
             hue.handleWrite(objectType, objectId, resourceId, value)
                 .catch((error) => {
@@ -183,7 +183,7 @@ function write(objectType, objectId, resourceId, value, callback) {
         }
 
     }
-    else if (objectType == mapping.getAttrId("actuator").objectTypeId) {
+    else if (objectType === mapping.getAttrId("actuator").objectTypeId) {
         if (!doorLock) {
             callback(new Error("DoorLock not enabled"));
         }
@@ -210,13 +210,13 @@ function setHandlers(deviceInfo) {
 }
 
 function register() {
-    return new Promise(function (resolve, reject) {
+    return new Promise(((resolve, reject) => {
         if (globalDeviceInfo) {
             reject(new Error("Can not register, already registered!"));
         }
         else {
             client.register(config.connection.host, config.connection.port, config.connection.url,
-                config.connection.endpoint, function (error, deviceInfo) {
+                config.connection.endpoint, (error, deviceInfo) => {
                     if (error) {
                         reject(error);
                     }
@@ -229,16 +229,16 @@ function register() {
                     }
                 })
         }
-    });
+    }));
 }
 
 function unregister() {
-    return new Promise(function (resolve, reject) {
+    return new Promise(((resolve, reject) => {
         if (!globalDeviceInfo) {
             reject(new Error("Can't unregister, not registered!"));
         }
         else {
-            client.unregister(globalDeviceInfo, function (error) {
+            client.unregister(globalDeviceInfo, (error) => {
                 if (error) {
                     reject(error);
                 }
@@ -248,7 +248,7 @@ function unregister() {
                 }
             })
         }
-    });
+    }));
 }
 
 function cmd_showConfig() {
@@ -259,14 +259,14 @@ function cmd_stop() {
     logger.info("Stopping client");
     const timeout_ms = 3000;
 
-    var timeout = setTimeout(() => {
+    const timeout = setTimeout(() => {
         logger.info("Timeout: Unable to unregister from server within " + timeout_ms + "ms!");
         stopDevices();
         cmd_exit();
     }, timeout_ms);
 
     unregister()
-        .catch(function (error) {
+        .catch((error) => {
             logger.error("Error while unregistering from server!");
             if (error) {
                 logger.error(error);
@@ -275,7 +275,7 @@ function cmd_stop() {
             stopDevices();
             cmd_exit();
         })
-        .then(function () {
+        .then(() => {
             clearTimeout(timeout);
             logger.info("Unregistered from '" + config.connection.host + ":" + config.connection.port + "'!");
             logger.info("Stopping devices");
@@ -305,7 +305,7 @@ function cmd_exit() {
     process.exit(0);
 }
 
-var commands = {
+const commands = {
     'stop': {
         parameters: [],
         description: '\tStop client',
