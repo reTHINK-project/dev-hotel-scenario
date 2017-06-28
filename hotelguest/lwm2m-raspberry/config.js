@@ -16,43 +16,42 @@
  *
  */
 
-var config = {};
-config.connection = {
-    host: "localhost",
-    port: 5683,
-    url: "/",
-    endpoint: "myRaspberry"
-};
-config.sensors = {
-    temperature: { //ds18b20
-        enabled: true,
-        refreshInterval: 10000 //Polling-interval for temperature
+export default  {
+    connection: {
+        host: "",
+        port: 5683,
+        url: "/",
+        endpoint: "myRaspberry"
     },
-    hue: {
-        enabled: false,
-        hostname: "192.168.1.2", //hostname of bridge
-        username: "5b1aa5d12ede1d7bd51cca4b97576d" //username acquired from registration via philipe-hue api
+    sensors: {
+        temperature: { //ds18b20
+            enabled: false,
+            refreshInterval: 10000 //Polling-interval for temperature
+        },
+        hue: {
+            enabled: false,
+            hostname: "", //hostname of bridge
+            username: "" //username acquired from registration via philips-hue api
+        },
+        doorLock: {
+            enabled: true
+        }
     },
-    doorLock: {
-        enabled: true
+    client: {
+        lifetime: '85671',
+        version: '1.0',
+        logLevel: 'DEBUG',
+        observe: {
+            period: 3000
+        },
+        ipProtocol: 'udp4',
+        serverProtocol: 'udp4',
+        formats: [
+            {
+                name: 'lightweightm2m/text',
+                value: 1541
+            }
+        ],
+        writeFormat: 'lightweightm2m/text'
     }
 };
-config.client = {
-    lifetime: '85671',
-    version: '1.0',
-    logLevel: 'DEBUG',
-    observe: {
-        period: 3000
-    },
-    ipProtocol: 'udp4',
-    serverProtocol: 'udp4',
-    formats: [
-        {
-            name: 'lightweightm2m/text',
-            value: 1541
-        }
-    ],
-    writeFormat: 'lightweightm2m/text'
-};
-
-module.exports = config;
