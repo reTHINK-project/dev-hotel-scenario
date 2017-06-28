@@ -165,7 +165,7 @@ function registrationHandler(endpoint, lifetime, version, binding, payload, call
 
             //LIGHT
             //Get list of light-ids
-            const lightIdsMatch = new RegExp("<\/3311[\/]([0-9]+)>", "g");
+            const lightIdsMatch = new RegExp("</3311[/]([0-9]+)>", "g");
             const lightIds = [];
             let result = null;
             do {
