@@ -228,11 +228,13 @@ function observeDeviceData(deviceName, objectType, objectId, resourceId) {
     logger.debug("Starting new observe with parameters", arguments);
     lwm2m.server.getRegistry().getByName(deviceName, (error, device) => {
         if (error) {
-            throw new Error(error);
+            logger.error(error);
+            return;
         }
         lwm2m.server.observe(device.id, objectType, objectId, resourceId, observeHandler, (error, value) => {
             if (error) {
-                throw new Error(error);
+                logger.error(error);
+                return;
             }
             logger.debug("Started observe for '%s'. First value: ", deviceName, value);
             if (value === '') { //No data => Device does not set data
