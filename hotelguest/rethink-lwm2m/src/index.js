@@ -65,6 +65,24 @@ function stop() {
     }
 }
 
+function list() {
+    lwm2m.server.listDevices((error, deviceList) => {
+        if (error) {
+            logger.error(error);
+        }
+        else if (deviceList.length > 0) {
+            logger.info("\nConnected lwm2m clients:");
+            deviceList.forEach((device) => {
+                logger.info(device);
+            });
+        }
+        else {
+            logger.info("\nNo lwm2m clients connected");
+        }
+        cmd.prompt();
+    });
+}
+
 function read(params) {
     lwm2m.server.read(...params, (error, result) => {
         if (error) {
@@ -73,6 +91,7 @@ function read(params) {
         else {
             logger.info("Read resource successfully", result);
         }
+        cmd.prompt();
     })
 }
 
@@ -84,6 +103,7 @@ function write(params) {
         else {
             logger.info("Written resource successfully!");
         }
+        cmd.prompt();
     })
 }
 
@@ -102,6 +122,7 @@ function loglevel(level) {
     else {
         logger.fatal("Current level", logger.getLevel());
     }
+    cmd.prompt();
 }
 
 
@@ -119,6 +140,11 @@ const commands = {
         parameters: [],
         description: '\tStop reTHINK-lwm2m',
         handler: stop
+    },
+    'list': {
+        parameters: [],
+        description: '\tList connected lwm2m clients',
+        handler: list
     },
     'write': {
         parameters: ['id', 'objectType', 'objectId', 'resourceId', 'value'],
