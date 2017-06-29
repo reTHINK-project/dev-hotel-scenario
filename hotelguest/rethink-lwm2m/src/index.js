@@ -65,21 +65,26 @@ function stop() {
     }
 }
 
+function read(params) {
+    lwm2m.server.read(...params, (error, result) => {
+        if (error) {
+            logger.info("Error while reading resource!", error);
+        }
+        else {
+            logger.info("Read resource successfully", result);
+        }
+    })
+}
+
 function write(params) {
-    lwm2m.server.write(
-        params[0],
-        params[1],
-        params[2],
-        params[3],
-        params[4],
-        (error) => {
-            if (error) {
-                logger.info("Error while writing resource!", error);
-            }
-            else {
-                logger.info("Written resource successfully!");
-            }
-        })
+    lwm2m.server.write(...params, (error) => {
+        if (error) {
+            logger.info("Error while writing resource!", error);
+        }
+        else {
+            logger.info("Written resource successfully!");
+        }
+    })
 }
 
 function showConfig() {
@@ -119,6 +124,11 @@ const commands = {
         parameters: ['id', 'objectType', 'objectId', 'resourceId', 'value'],
         description: '\tManual lwm2m-write for development-tests',
         handler: write
+    },
+    'read': {
+        parameters: ['id', 'objectType', 'objectId', 'resourceId'],
+        description: '\tManual lwm2m-read for development-tests',
+        handler: read
     },
     'config': {
         parameters: [],
