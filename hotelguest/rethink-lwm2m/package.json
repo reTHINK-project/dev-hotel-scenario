@@ -23,7 +23,7 @@
     "logops": "^2.0.0",
     "lwm2m-node-lib": "git://github.com/telefonicaid/lwm2m-node-lib.git#develop",
     "mongodb": "^2.2.29",
-    "mongoose": "^4.10.8"
+    "mongoose": "^5.7.8"
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",
